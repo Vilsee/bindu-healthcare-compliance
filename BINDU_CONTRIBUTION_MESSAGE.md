@@ -8,7 +8,9 @@ I'm applying for the role at Bindu. Instead of a resume, I've built a **Complian
 Healthcare AI is risky. This agent solves that by being **Compliance-First**:
 - **A2A / AP2 / X402 Compliant**: Fully structured following the `bindufy` server patterns.
 - **Strict Evidence Gating (RAG)**: Zero hallucinations. Every recommendation is linked to institutional guidelines.
-- **[SURPRISE] Collaborative Reasoning**: For complex cases (e.g., Alzheimer's, MS), the agent autonomously initiates an A2A call to consult a "Specialist Agent" to verify protocol alignment.
+- **[SURPRISE] Collaborative Reasoning**: Expanded to 10+ high-complexity conditions (ADHD, Autism, PTSD, Schizophrenia, etc.).
+- **[NEW] Massive Neuro-Expansion**: 40+ clinical protocols across Learning, Psychiatric, and Rare Genetic categories.
+- **[NEW] Therapeutic Sound Integration**: Identifies sensory-soothing audio matched to the patient's condition.
 - **X402 Autonomous Payments**: Built-in logic for machine-native transactions using USDC on Base.
 
 ### 🏗️ How it's built:

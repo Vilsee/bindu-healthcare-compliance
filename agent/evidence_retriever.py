@@ -1,10 +1,12 @@
 import os
 import re
+import json
 
 class EvidenceRetriever:
-    def __init__(self, guidelines_dir):
+    def __init__(self, guidelines_dir="guidelines"):
         self.guidelines_dir = guidelines_dir
         self.guidelines = self._load_guidelines()
+        self.therapeutic_assets = self._load_therapeutic_assets()
 
     def _load_guidelines(self):
         guidelines = []
@@ -21,11 +23,17 @@ class EvidenceRetriever:
                     protocol_id = "UNKNOWN"
                     title = filename
                     
-                    id_match = re.search(r"institutional_protocol:\s*(\S+)", content)
+                    id_match = re.search(r"ID:\s*(\S+)", content)
+                    if not id_match:
+                        id_match = re.search(r"institutional_protocol:\s*(\S+)", content)
+                    
                     if id_match:
                         protocol_id = id_match.group(1)
                     
-                    title_match = re.search(r"Title:\s*(.+)", content)
+                    title_match = re.search(r"TITLE:\s*(.+)", content)
+                    if not title_match:
+                        title_match = re.search(r"Title:\s*(.+)", content)
+                    
                     if title_match:
                         title = title_match.group(1).strip()
                     
@@ -37,16 +45,44 @@ class EvidenceRetriever:
                     })
         return guidelines
 
+    def _load_therapeutic_assets(self):
+        path = os.path.join(os.path.dirname(__file__), "therapeutic_assets.json")
+        if os.path.exists(path):
+            with open(path, "r") as f:
+                return json.load(f).get("calming_sounds", [])
+        return []
+
+    def get_evidence(self, query):
+        """
+        Retrieves matching clinical evidence.
+        """
+        results = self.retrieve(query)
+        if results:
+            return {
+                "source": results[0]["source"],
+                "content": results[0]["snippet"],
+                "therapeutic_sounds": self.get_therapeutic_sounds(query)
+            }
+        return None
+
+    def get_therapeutic_sounds(self, query):
+        """
+        Matches calming sounds based on query keywords.
+        """
+        matches = []
+        q = query.lower()
+        for sound in self.therapeutic_assets:
+            for condition in sound["recommended_for"]:
+                if condition.lower() in q:
+                    matches.append(sound)
+                    break
+        return matches
+
     def retrieve(self, query):
-        """
-        Simple keyword-based retrieval as a fallback/simplified RAG.
-        Returns a list of matching snippets and their sources.
-        """
         matches = []
         query_words = set(re.findall(r'\w+', query.lower()))
         
         for g in self.guidelines:
-            # Score based on keyword overlap
             content_lower = g["content"].lower()
             score = 0
             for word in query_words:
@@ -54,16 +90,13 @@ class EvidenceRetriever:
                     score += 1
             
             if score > 0:
-                # Extract relevant section (simplified: return first 500 chars)
-                # In a real RAG, we'd use embeddings and chunking.
                 matches.append({
                     "source": g["id"],
                     "title": g["title"],
                     "relevance_score": score,
-                    "snippet": g["content"][:1000] # Provide full content if small
+                    "snippet": g["content"]
                 })
         
-        # Sort by relevance
         matches.sort(key=lambda x: x["relevance_score"], reverse=True)
         return matches
 

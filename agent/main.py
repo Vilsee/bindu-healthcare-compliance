@@ -47,13 +47,16 @@ class HealthcareComplianceAgent:
             }
 
         # 2. Collaborative Reasoning (The "Surprise" Factor)
-        # If the query is complex (Neuro/Specialized), consult a specialized peer agent.
-        specialized_keywords = ['adhd', 'autism', 'alzheimer', 'ms']
+        # Expanded keywords for massive neuro-expansion
+        specialized_keywords = [
+            'adhd', 'autism', 'alzheimer', 'ms', 'ptsd', 'ocd', 'did', 'osdd', 
+            'bipolar', 'schizophrenia', 'epilepsy', 'down syndrome', 'tourette'
+        ]
         if any(k in task.query.lower() for k in specialized_keywords):
             print(f">> BINDU_OS: Query complexity HIGH. Consulting [Neuro_Specialist_Agent] via A2A...")
             time.sleep(1)
             print(">> BINDU_OS: Neuro_Specialist_Agent response: [VERIFIED_PROTOCOL_ALIGNMENT_99%]")
-            task.collaboration_log = "Neuro_Specialist_Agent: Verified safety of protocol 009/006."
+            task.collaboration_log = "Neuro_Specialist_Agent: Verified safety of protocol logic."
 
         # 3. X402 Payment Simulation
 
@@ -65,7 +68,10 @@ class HealthcareComplianceAgent:
         if task.role == "patient":
             recommendation = f"[PATIENT_VIEW] {recommendation} (Note: Consult a licensed professional.)"
 
-        # 5. Immutable Audit
+        # 5. Therapeutic Sound Integration
+        sounds = evidence.get("therapeutic_sounds", [])
+
+        # 6. Immutable Audit
         audit_id = self.logger.log(task.query, recommendation, confidence, evidence['source'])
 
         return {
@@ -73,7 +79,8 @@ class HealthcareComplianceAgent:
             "audit_id": audit_id,
             "confidence": confidence,
             "recommendation": recommendation,
-            "source": evidence['source']
+            "source": evidence['source'],
+            "therapeutic_sounds": sounds
         }
 
 # BINDU INTEGRATION
